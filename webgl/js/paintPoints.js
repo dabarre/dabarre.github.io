@@ -4,9 +4,9 @@ Seminario 1 PGC. Paint points function
 
 // Vertices shader
 var VSHADER_SOURCE =
-'attribute vec4 posicion;       \n' +
+'attribute vec4 position;       \n' +
 'void main() {                  \n' +
-'   gl_Position = posicion;     \n' +
+'   gl_Position = position;     \n' +
 '   gl_PointSize = 10.0;        \n' +
 '}                              \n';
 
@@ -44,7 +44,7 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     // Localize the attribute in the vertices shader
-    var coordinates = gl.getAttribLocation(gl.program, 'posicion');
+    var coordinates = gl.getAttribLocation(gl.program, 'position');
 
     // Register event
     canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
