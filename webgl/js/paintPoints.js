@@ -20,34 +20,34 @@ function main() {
     // Get canvas where graphics are displayed
     var canvas = document.getElementById("canvas")
         
-        if (!canvas) {
-            console.log("Error loading canvas");
-            return;
-        }
+    if (!canvas) {
+        console.log("Error loading canvas");
+        return;
+    }
 
-        // Get render context
-        var gl = getWebGLContext(canvas);
-        if (!gl) {
-            conlose.log("Error loading the context render");
-            return;
-        }
+    // Get render context
+    var gl = getWebGLContext(canvas);
+    if (!gl) {
+        conlose.log("Error loading the context render");
+        return;
+    }
 
-        // Load, compile and mount shaders in a 'program'
-        if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-            console.log("Error loading shaders");
-            return;
-        }
+    // Load, compile and mount shaders in a 'program'
+    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+        console.log("Error loading shaders");
+        return;
+    }
 
-        // Set clear color
-        gl.clearColor(0.0, 0.2, 0.4, 1.0);
-        // Clear canvas
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        
-        // Localize the attribute in the vertices shader
-        var coordinates = gl.getAttribLocation(gl.program, 'position');
+    // Set clear color
+    gl.clearColor(0.0, 0.2, 0.4, 1.0);
+    // Clear canvas
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    
+    // Localize the attribute in the vertices shader
+    var coordinates = gl.getAttribLocation(gl.program, 'position');
 
-        // Register event
-        canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
+    // Register event
+    canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
 
 }
 
