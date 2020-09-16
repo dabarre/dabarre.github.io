@@ -31,13 +31,13 @@ function main() {
         conlose.log("Error loading the context render");
         return;
     }
-
+    /*
     // Load, compile and mount shaders in a 'program'
     if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
         console.log("Error loading shaders");
         return;
     }
-
+    */
     // Set clear color
     gl.clearColor(0.0, 0.2, 0.4, 1.0);
     // Clear canvas
@@ -47,7 +47,7 @@ function main() {
     var coordinates = gl.getAttribLocation(gl.program, 'position');
 
     // Register event
-    canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
+    //canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
 
 }
 
