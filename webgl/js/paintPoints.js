@@ -65,6 +65,8 @@ function click(event, gl, canvas, coordinates) {
     x = ((x-rect.left) - canvas.width/2) * 2 / canvas.width;
     y = (canvas.height / 2 - (y - rect.top)) * 2 / canvas.height;
 
+    console.log(x, y);
+
     // Save point
     points.push(x);
     points.push(y);
