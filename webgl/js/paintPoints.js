@@ -13,7 +13,7 @@ var VSHADER_SOURCE =
 // Fragments shader
 var FSHADER_SOURCE =
 'void main() {                                  \n' +
-'   gl_FraColor = vec(1.0, 0.0, 0.0, 1.0);      \n' +
+'   gl_FragColor = vec(1.0, 0.0, 0.0, 1.0);      \n' +
 '}                                              \n';
 
 function main() {
@@ -75,6 +75,8 @@ function click(event, gl, canvas, coordinates) {
     // Insert coordinates of points as an attribute and draw them
     for (var i=0; i < points.length; i+=2) {
         gl.vertexAttrib3f(coordinates, points[i], points[i+1], 0.0);
-        gl.drawArrays(gl.POINTS, 0, 1);
+        // Instead of points draw line strip
+        // Mirar slide 20
+        gl.drawArrays(gl.LINE_STRIP, 0, 1);
     }
 }
