@@ -39,7 +39,7 @@ function main() {
         }
 
         // Set clear color
-        gl.clearColor(1.0, 0.0, 0.0, 1.0);
+        gl.clearColor(0.0, 1.0, 0.0, 1.0);
         // Clear canvas
         gl.clear(gl.COLOR_BUFFER_BIT);
         
@@ -52,6 +52,7 @@ function main() {
 }
 
 // Points drawn array
+// Line strips
 var points = [];
 
 function click(event, gl, canvas, coordinates) {
