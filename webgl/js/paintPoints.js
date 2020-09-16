@@ -47,8 +47,8 @@ function main() {
         var coordinates = gl.getAttribLocation(gl.program, 'position');
 
         // Register event
-        canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
-
+        //canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
+        
 }
 
 // Points drawn array
