@@ -79,6 +79,6 @@ function click(event, gl, canvas, coordinates) {
         gl.vertexAttrib3f(coordinates, points[i], points[i+1], 0.0);
         // Instead of points draw line strip
         // Mirar slide 20
-        gl.drawArrays(gl.LINE_STRIP, 0, 1);
+        gl.drawArrays(gl.LINE_STRIP, 0, points.length/2);
     }
 }
