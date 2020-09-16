@@ -62,7 +62,7 @@ function click(event, gl, canvas, coordinates) {
     var rect = event.target.getBoundingClientRect();
 
     // Coordinate conversion
-    x = ((x-rect.left) - canvas.width/2) * 2 / canvas.width;
+    x = ((x - rect.left) - canvas.width / 2) * 2 / canvas.width;
     y = (canvas.height / 2 - (y - rect.top)) * 2 / canvas.height;
 
     console.log(x, y);
