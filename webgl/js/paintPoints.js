@@ -4,9 +4,9 @@ Seminario 1 PGC. Paint points function
 
 // Vertices shader
 var VSHADER_SOURCE =
-'attribute vec4 position;       \n' +
+'attribute vec4 posicion;       \n' +
 'void main() {                  \n' +
-'   gl_Position = position;     \n' +
+'   gl_Position = posicion;     \n' +
 '   gl_PointSize = 10.0;        \n' +
 '}                              \n';
 
@@ -31,7 +31,7 @@ function main() {
         conlose.log("Error loading the context render");
         return;
     }
-    
+
     // Load, compile and mount shaders in a 'program'
     if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
         console.log("Error loading shaders");
@@ -44,7 +44,7 @@ function main() {
     gl.clear(gl.COLOR_BUFFER_BIT);
     
     // Localize the attribute in the vertices shader
-    var coordinates = gl.getAttribLocation(gl.program, 'position');
+    var coordinates = gl.getAttribLocation(gl.program, 'posicion');
 
     // Register event
     canvas.onmousedown = function(event) {click(event, gl, canvas, coordinates);};
