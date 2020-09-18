@@ -4,17 +4,23 @@ Seminario 1 PGC. Paint points function
 
 // Vertices shader
 var VSHADER_SOURCE =
-'attribute vec4 position;       \n' +
-'void main() {                  \n' +
-'   gl_Position = position;     \n' +
-'   gl_PointSize = 10.0;        \n' +
-'}                              \n';
+'attribute vec4 position;                                           \n' +
+'precision mediump float;                                           \n' +
+'varying vec4 color;                                                \n' +
+'void main() {                                                      \n' +
+'   gl_Position = position;                                         \n' +
+'   gl_PointSize = 10.0;                                            \n' +
+'   float i = sqrt(pow(position[0], 2.0) + pow(position[1], 2.0));  \n' +
+'   color = vec4(1.0-i, 1.0-i, 1.0-i, 1.0);                         \n' +
+'}                                                                  \n';
 
 // Fragments shader
 var FSHADER_SOURCE =
-'void main() {                                  \n' +
-'   gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);    \n' +
-'}                                              \n';
+'precision mediump float;   \n' +
+'varying vec4 color;        \n' +
+'void main() {              \n' +
+'   gl_FragColor = color;   \n' +
+'}                          \n';
 
 function main() {
     // Get canvas where graphics are displayed
@@ -55,8 +61,10 @@ function main() {
 // Line strips
 var points = [];
 
+
+// Would it be interesting to separate clicking and painting?
 function click(event, gl, canvas, coordinates) {
-    // Get clicked point
+    // Get clicked point muestre un área de dibujo donde el usuario pueda mediante clicks de ratón ir marcando puntos. La aplicación (script en webgl y   shaders) debe dibujar una polilínea y sus vértices conforme el usuario va 
     var x = event.clientX;
     var y = event.clientY;
     var rect = event.target.getBoundingClientRect();
@@ -65,20 +73,27 @@ function click(event, gl, canvas, coordinates) {
     x = ((x - rect.left) - canvas.width / 2) * 2 / canvas.width;
     y = (canvas.height / 2 - (y - rect.top)) * 2 / canvas.height;
 
-    console.log(x, y);
-
     // Save point
     points.push(x);
     points.push(y);
+    points.push(0); // Los puntos estan en un espacio 3D
 
     // Clear canvas
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // Insert coordinates of points as an attribute and draw them
-    for (var i=0; i < points.length; i+=2) {
-        gl.vertexAttrib3f(coordinates, points[i], points[i+1], 0.0);
-        // Instead of points draw line strip
-        // Mirar slide 20
-        gl.drawArrays(gl.POINTS, 0, 1);
-    }
+    // Ponerlos para que se lean bien
+    var vertices = new Float32Array(points)
+
+    var buffer = gl.createBuffer()
+
+    // Preparar buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+    // Introducir los puntos a dibujar
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+    gl.vertexAttribPointer(coordinates, 3.0, gl.FLOAT, false, 0.0, 0.0)
+    gl.enableVertexAttribArray(coordinates)
+    // Dibujar los puntos
+    gl.drawArrays(gl.POINTS, 0.0, vertices.length/3)
+    // Dibujar las lineas
+    gl.drawArrays(gl.LINE_STRIP, 0.0, vertices.length/3)
 }
