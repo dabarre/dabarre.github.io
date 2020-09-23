@@ -6,7 +6,7 @@ Lab 2 GPC. Robotic Arm
 var renderer, scene, camera;
 
 // Other global variables
-var cubeSphere, angle = 0;
+var angle = 0;
 
 // Actions when the body and this script is loaded
 init();
@@ -28,12 +28,13 @@ function init() {
     // Camera
     var aspectRatio = window.innerWidth / window.innerHeight;
     // angleVision, aspectRatio, minVisionPosition, maxVisionPosition
-    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 500);
+    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 600);
 
     scene.add(camera);
 
-    camera.position.set(80, 150, 150);
-    camera.lookAt(new THREE.Vector3(0,80,0));
+    camera.position.set(200, 200, 400);
+    //camera.position.set(200, 200, 00);
+    camera.lookAt(new THREE.Vector3(0, 100, 0));
 }
 
 function loadScene() {
@@ -55,12 +56,56 @@ function loadScene() {
     var geoAsparagus = new THREE.BoxGeometry(18, 120, 12);
     var geoKneecap = new THREE.SphereGeometry(20, 30, 30);
 
-    var geoDisc = new THREE.CylinderGeometry(22, 22, 6, 32); 
+    var geoDisc = new THREE.CylinderGeometry(22, 22, 6, 32);
+    var geoHand = new THREE.CylinderGeometry(15, 15, 40, 32);
     var geoNerve = new THREE.BoxGeometry(4, 80, 4);
-    //var hand = new THREE.CylinderGeometry(15, 15, 40, 32);
     
-    var geoRightClamp
-    var geoLeftClamp
+    var geoClamp = new THREE.Geometry();
+    geoClamp.vertices.push(
+        new THREE.Vector3(-10, -10, -2),
+        new THREE.Vector3(-10, -10, 2),
+        new THREE.Vector3(-10, 10, 2),
+        new THREE.Vector3(-10, 10, -2),
+        new THREE.Vector3(9, 10, -2),
+        new THREE.Vector3(9, -10, -2),
+        new THREE.Vector3(9, -10, 2),
+        new THREE.Vector3(9, 10, 2),
+        new THREE.Vector3(28, 5, 2),
+        new THREE.Vector3(28, -5, 2),
+        new THREE.Vector3(28, -5, 0),
+        new THREE.Vector3(28, 5, 0),
+    );
+    geoClamp.faces.push(
+        new THREE.Face3(0, 2, 1),
+        new THREE.Face3(1, 2, 3),
+
+        new THREE.Face3(0, 6, 1),
+        new THREE.Face3(1, 6, 5),
+        
+        new THREE.Face3(0, 7, 2),
+        new THREE.Face3(0, 6, 7),
+        
+        new THREE.Face3(2, 7, 4),
+        new THREE.Face3(2, 4, 3),
+
+        new THREE.Face3(1, 3, 4),
+        new THREE.Face3(1, 5, 4),
+        
+        new THREE.Face3(4, 7, 8),
+        new THREE.Face3(4, 8, 11),
+        
+        new THREE.Face3(6, 9, 8),
+        new THREE.Face3(6, 8, 7),
+        
+        new THREE.Face3(6, 9, 10),
+        new THREE.Face3(6, 10, 5),
+        
+        new THREE.Face3(9, 10, 11),
+        new THREE.Face3(9, 11, 8),
+        
+        new THREE.Face3(4, 11, 5),
+        new THREE.Face3(5, 11, 10),
+    );
 
     // Objects
     var plane = new THREE.Mesh(geoPlane, planeMaterial);
@@ -69,18 +114,33 @@ function loadScene() {
     var axis = new THREE.Mesh(geoAxis, baseMaterial);
     var asparagus = new THREE.Mesh(geoAsparagus, detailMaterial);
     var kneecap = new THREE.Mesh(geoKneecap, baseMaterial);
-    //var axis = new THREE.Mesh(geoAxis, );
-    //var asparagus = new THREE.Mesh();
-    //var kneecap 
-
-
-    //var cube = new THREE.Mesh(geoCube, material);
-    //var sphere = new THREE.Mesh(geoSphere, material);
+    
+    var disc = new THREE.Mesh(geoDisc, baseMaterial);
+    var hand = new THREE.Mesh(geoHand, baseMaterial);
+    var nerve1 = new THREE.Mesh(geoNerve, detailMaterial);
+    var nerve2 = nerve1.clone();
+    var nerve3 = nerve1.clone();
+    var nerve4 = nerve1.clone();
+    var clampL = new THREE.Mesh(geoClamp, detailMaterial)
+    var clampR = clampL.clone()
 
     // PlaneGeometry
 
     // Transformations the order is not important
     // but a specific order has been stablished Trans <- Rot <- Scal
+    clampL.position.set(0, 200, -15);
+    clampR.rotation.x = Math.PI;
+    clampR.position.set(0, 200, 15);
+
+    hand.rotation.x = Math.PI/2;
+    hand.position.y = 200;
+    disc.position.y = 120;
+    nerve1.position.set(7.5, 160, 7.5);
+    nerve2.position.set(-7.5, 160, 7.5);
+    nerve3.position.set(-7.5, 160, -7.5);
+    nerve4.position.set(7.5, 160, -7.5);
+
+
     kneecap.position.y = 120;
     asparagus.position.y = 60;
     axis.rotation.x = Math.PI/2;
@@ -91,15 +151,23 @@ function loadScene() {
     robot = new THREE.Object3D();
     arm = new THREE.Object3D();
     foreArm = new THREE.Object3D();
-    hand = new THREE.Object3D();
+    handContainer = new THREE.Object3D();
     
     // Organize scene graph
     scene.add(new THREE.AxesHelper((1000, 1000, 1000)));
     
-    // hand <- rClamp, lClamp
-
-    // foreArm <- disc, nerves, hand
+    // handContainer <- rClamp, lClamp
+    handContainer.add(clampL);
+    handContainer.add(clampR);
+    
+    // foreArm <- disc, nerves, hand, handContainer
     foreArm.add(hand);
+    foreArm.add(disc);
+    foreArm.add(nerve1);
+    foreArm.add(nerve2);
+    foreArm.add(nerve3);
+    foreArm.add(nerve4);
+    foreArm.add(handContainer);
 
     // arm <- axis, asparagus, kneecap, foreArm
     arm.add(kneecap);
@@ -113,6 +181,9 @@ function loadScene() {
     // robot <- base
     robot.add(base);
 
+
+    robot.rotation.y = angle;
+
     // scene <- plane, base    
     scene.add(robot);
     scene.add(plane);
@@ -121,7 +192,7 @@ function loadScene() {
 function update() {
     // Frame variation during each frame
     
-    //angle += Math.PI/100;
+    angle += Math.PI/100;
 
 }
 
