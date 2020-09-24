@@ -32,8 +32,8 @@ function init() {
 
     scene.add(camera);
 
-    camera.position.set(200, 200, 400);
-    //camera.position.set(200, 200, 00);
+    camera.position.set(150, 300, 300);
+    
     camera.lookAt(new THREE.Vector3(0, 100, 0));
 }
 
@@ -124,52 +124,48 @@ function loadScene() {
     var clampL = new THREE.Mesh(geoClamp, detailMaterial)
     var clampR = clampL.clone()
 
-    // PlaneGeometry
-
-    // Transformations the order is not important
-    // but a specific order has been stablished Trans <- Rot <- Scal
-    clampL.position.set(0, 200, -15);
-    clampR.rotation.x = Math.PI;
-    clampR.position.set(0, 200, 15);
-
-    hand.rotation.x = Math.PI/2;
-    hand.position.y = 200;
-    disc.position.y = 120;
-    nerve1.position.set(7.5, 160, 7.5);
-    nerve2.position.set(-7.5, 160, 7.5);
-    nerve3.position.set(-7.5, 160, -7.5);
-    nerve4.position.set(7.5, 160, -7.5);
-
-
-    kneecap.position.y = 120;
-    asparagus.position.y = 60;
-    axis.rotation.x = Math.PI/2;
-    
-    plane.rotation.x = Math.PI/2;
-
     // Container object
     robot = new THREE.Object3D();
     arm = new THREE.Object3D();
     foreArm = new THREE.Object3D();
     handContainer = new THREE.Object3D();
+
+    // Transformations the order is not important
+    // but a specific order has been stablished Trans <- Rot <- Scal
+
     
-    // Organize scene graph
-    scene.add(new THREE.AxesHelper((1000, 1000, 1000)));
-    
-    // handContainer <- rClamp, lClamp
+    //handContainer <- rClamp, lClamp
+    clampL.position.z = -15;
+    clampR.rotation.x = Math.PI;
+    clampR.position.z = 15;
+    hand.rotation.x = Math.PI/2;
+
     handContainer.add(clampL);
     handContainer.add(clampR);
+    handContainer.add(hand);    
+    handContainer.position.y = 80;
+
+    // foreArm <- disc, nerves, handContainer
+    nerve1.position.set(7.5, 40, 7.5);
+    nerve2.position.set(-7.5, 40, 7.5);
+    nerve3.position.set(-7.5, 40, -7.5);
+    nerve4.position.set(7.5, 40, -7.5);
+
     
-    // foreArm <- disc, nerves, hand, handContainer
-    foreArm.add(hand);
     foreArm.add(disc);
     foreArm.add(nerve1);
     foreArm.add(nerve2);
     foreArm.add(nerve3);
     foreArm.add(nerve4);
     foreArm.add(handContainer);
+    foreArm.position.y = 120;
+
 
     // arm <- axis, asparagus, kneecap, foreArm
+    kneecap.position.y = 120;
+    asparagus.position.y = 60;
+    axis.rotation.x = Math.PI/2;
+    
     arm.add(kneecap);
     arm.add(asparagus);
     arm.add(axis);
@@ -181,19 +177,19 @@ function loadScene() {
     // robot <- base
     robot.add(base);
 
+    // scene <- plane, base
+    plane.rotation.x = Math.PI/2;
 
-    robot.rotation.y = angle;
-
-    // scene <- plane, base    
     scene.add(robot);
     scene.add(plane);
+
+    // Organize scene graph
+    scene.add(new THREE.AxesHelper((1000, 1000, 1000)));
 }
 
 function update() {
     // Frame variation during each frame
-    
-    angle += Math.PI/100;
-
+    //robot.rotation.y += Math.PI/100
 }
 
 function render() {
