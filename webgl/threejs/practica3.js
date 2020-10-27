@@ -37,7 +37,7 @@ function init() {
     // Camera controller
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
     cameraControls.target.set(0, 0, 0);
-    cameraControls.enableKeys = true;
+    cameraControls.enableKeys = false;
 
     // Event capture
     window.addEventListener('resize', updateAspectRatio);
@@ -209,7 +209,7 @@ function setCameras(aspectRatio) {
     planta.up = new THREE.Vector3(0, 0, -1);
 
     // angleVision, aspectRatio, minVisionPosition, maxVisionPosition
-    var perspectiveCamera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 800);
+    var perspectiveCamera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 1500);
     perspectiveCamera.position.set(200, 300, 450);    
     perspectiveCamera.lookAt(new THREE.Vector3(0, 100, 0));
     camera = perspectiveCamera.clone();

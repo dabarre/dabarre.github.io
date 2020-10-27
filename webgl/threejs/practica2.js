@@ -28,7 +28,7 @@ function init() {
     // Camera
     var aspectRatio = window.innerWidth / window.innerHeight;
     // angleVision, aspectRatio, minVisionPosition, maxVisionPosition
-    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 600);
+    camera = new THREE.PerspectiveCamera(50, aspectRatio, 0.1, 2000);
 
     scene.add(camera);
 
