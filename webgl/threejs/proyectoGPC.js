@@ -14,7 +14,7 @@ var stats;
 var effectController;
 var dices = [];
 
-var upPressed = downPressed = leftPressed = rightPressed = jumpPressed = false;
+var jumpPressed = false;
 
 var l = b = -100;
 var r = t = -l;
@@ -34,16 +34,22 @@ var earth_angle = 0;
 var moon;
 var moon_radius = 1737;
 var distance = 384000;
-var player;
 var spaceSuit;
-var human_height = 0.0018;
+
+var players = [];
+var extra_dist = 10;
+var positions = [[moon_radius+extra_dist, 0, 0], [0, moon_radius+extra_dist, 0], [0, 0, moon_radius+extra_dist],
+                [-moon_radius-extra_dist, 0, 0], [0, -moon_radius-extra_dist, 0], [0, 0, -moon_radius-extra_dist],
+                [moon_radius+extra_dist, moon_radius+extra_dist, 0], [-moon_radius-extra_dist, moon_radius+extra_dist, 0], [moon_radius+extra_dist, -moon_radius-extra_dist, 0], [-moon_radius-extra_dist, -moon_radius-extra_dist, 0], 
+                [moon_radius+extra_dist, 0, moon_radius+extra_dist], [-moon_radius-extra_dist, 0, moon_radius+extra_dist], [moon_radius+extra_dist, 0, -moon_radius-extra_dist], [-moon_radius-extra_dist, 0, -moon_radius-extra_dist], 
+                [0, moon_radius+extra_dist, moon_radius+extra_dist], [0, -moon_radius-extra_dist, moon_radius+extra_dist], [0, moon_radius+extra_dist, -moon_radius-extra_dist], [0, -moon_radius-extra_dist, -moon_radius-extra_dist]];
 
 earth_radius *= scale;
 moon_radius *= scale;
 distance *= scale**2;
 
 // Variables gravity sphere
-var gravity = -9.82; //1.625
+var gravity = -1.625;
 var moveSpeed = 15;
 var moveX = moveY = 0;
 var moveDir;
@@ -127,6 +133,11 @@ function loadScene() {
     earthTexture.minFilter = THREE.LinearFilter;
     earthTexture.wrapS = earthTexture.wrapT = THREE.MirroredRepeatWrapping;
 
+    var cloudTexture = new THREE.TextureLoader().load(path+"earthcloudmaptrans.jpg");
+    cloudTexture.magFilter = THREE.LinearFilter;
+    cloudTexture.minFilter = THREE.LinearFilter;
+    cloudTexture.wrapS = cloudTexture.wrapT = THREE.MirroredRepeatWrapping;
+
     var spaceTexture = new THREE.TextureLoader().load(path+"space2.jpg");
     spaceTexture.magFilter = THREE.LinearFilter;
     spaceTexture.minFilter = THREE.LinearFilter;
@@ -137,23 +148,30 @@ function loadScene() {
     var earthMaterial = new THREE.MeshPhongMaterial({color: 'white',
                                                     shininess: 25,
                                                     map: earthTexture});
+    var cloudMaterial = new THREE.MeshPhongMaterial({map: cloudTexture,
+                                                    side: THREE.DoubleSide,
+                                                    opacity: 0.4,
+                                                    transparent : true,
+                                                    depthWrite: false})
     var spaceMaterial = new THREE.MeshBasicMaterial({color: 'white',
                                                     side: THREE.BackSide,
                                                     map: spaceTexture});
-    var sunMaterial = new THREE.MeshPhongMaterial({color: 'yellow',
+    var sunMaterial = new THREE.MeshPhongMaterial({color: 'white',
                                                     emissive: 0xFFF300});
-    
-    
 
     // Geometries
     var geoEarth = new THREE.SphereGeometry(earth_radius, 100, 100);
+    var geoCloud   = new THREE.SphereGeometry(earth_radius+10, 32, 32)
     var geoSpace = new THREE.SphereGeometry(space_radius, 15, 15);
     var geoSun = new THREE.SphereGeometry(sun_radius, 15, 15 );
     
     // Objects
     earth = new THREE.Mesh(geoEarth, earthMaterial);
     earth.receiveShadow = true;
-    earth.castShadow = true;
+    earth.castShadow = true;    
+    
+    var cloud = new THREE.Mesh(geoCloud, cloudMaterial)
+    earth.add(cloud)
     
     var space = new THREE.Mesh(geoSpace, spaceMaterial);
 
@@ -167,10 +185,12 @@ function loadScene() {
     moon = new create_moon();
     scene.add(moon.visual);
     world.addBody(moon.body);
-
-    player = new create_player();
-    scene.add(player.visual);
-    world.add(player.body);
+    
+    for (i=0; i<positions.length; i++) {
+        players.push(new create_player(positions[i]))
+        scene.add(players[i].visual);
+        world.add(players[i].body);
+    }
     
     // Organize scene graph
     scene.add(new THREE.AxesHelper((4000, 4000, 4000)));
@@ -190,6 +210,18 @@ function create_lights() {
 }
 
 function create_moon() {
+    // Physics
+    var planetMaterial;
+    for (var i=0; i<world.materials.length; i++) {
+        if (world.materials[i].name==="planetMaterial") planetMaterial = world.materials[i];
+    }
+    var moonShape = new CANNON.Sphere(moon_radius);
+    this.body = new CANNON.Body({
+        mass: 0,
+        material: planetMaterial
+    });
+    this.body.addShape(moonShape);
+
     // Visuals
     var moonTexture = new THREE.TextureLoader().load(path+"moon.jpg");
     moonTexture.magFilter = THREE.LinearFilter;
@@ -206,78 +238,74 @@ function create_moon() {
     this.visual.receiveShadow = true;
     this.visual.castShadow = true;
     this.visual.rotation.x = AXIAL_TILT;
-    
-
-    // Physics
-    var planetMaterial;
-    for (var i=0; i<world.materials.length; i++) {
-        if (world.materials[i].name==="planetMaterial") planetMaterial = world.materials[i];
-    }
-    var moonShape = new CANNON.Sphere(moon_radius);
-    this.body = new CANNON.Body({
-        mass: 0,
-        material: planetMaterial
-    });
-    this.body.addShape(moonShape);
 }
 
-function create_player() {
-    /*
-    var baseMaterial = new THREE.MeshLambertMaterial({color: 'white',
-                                                        map: baseTexture});
-    
-   var geoPlayer = new THREE.CylinderGeometry(3, 3, 10, 16);
-
-   player = new THREE.Object3D();
-   spaceSuit = new THREE.Object3D();
-   var lens;
-   var body;
-   */
+function create_player(position) {
     // Physics
-   var astronautMaterial;
-   for (var i=0; i<world.materials.length; i++) {
-       if (world.materials[i].name==="astronautMaterial") astronautMaterial = world.materials[i];
-   }
-   var playerShape = new CANNON.Sphere(10);
-   this.body = new CANNON.Body({
-       mass: 80,
-       material: astronautMaterial
-   });
-   this.body.position = new CANNON.Vec3(0, moon_radius+50, 0);
-   this.body.linearDamping = this.body.angularDamping = 0.1;
-   this.body.addShape(playerShape);
+    var astronautMaterial;
+    for (var i=0; i<world.materials.length; i++) {
+        if (world.materials[i].name==="astronautMaterial") astronautMaterial = world.materials[i];
+    }
+    var playerShape = new CANNON.Sphere(10);
+    this.body = new CANNON.Body({
+        mass: 80,
+        material: astronautMaterial
+    });
+    this.body.position = new CANNON.Vec3(position[0], position[1], position[2]);
+    this.body.linearDamping = this.body.angularDamping = 0.1;
+    this.body.addShape(playerShape);
 
-   // Visuals
-   var suitMaterial = new THREE.MeshLambertMaterial({color: 'white'});
-   var glassMaterial = new THREE.MeshPhongMaterial({color: 0x77cbff,
-                                                   shininess: 25});
+    // Visuals
+    var suitTexture = new THREE.TextureLoader().load(path+"spaceSuit.jpg");
+    suitTexture.magFilter = THREE.LinearFilter;
+    suitTexture.minFilter = THREE.LinearFilter;
+    suitTexture.wrapS = suitTexture.wrapT = THREE.MirroredRepeatWrapping;
+    suitTexture.repeat.set(2, 2);
+    var suitMaterial = new THREE.MeshLambertMaterial({color: 'red',
+                                                    map: suitTexture});
+    var geoSuit = new THREE.SphereGeometry(10, 10, 10);
 
-   var geoPlayer = new THREE.SphereGeometry(10, 10, 10);
-
-   this.visual = new THREE.Mesh(geoPlayer, suitMaterial);
-   this.visual.position.copy(this.body.position);
-   this.visual.receiveShadow = true;
-   this.visual.castShadow = true;   
+    spaceSuit = new THREE.Mesh(geoSuit, suitMaterial);
+    spaceSuit.receiveShadow = true;
+    spaceSuit.castShadow = true;
+    
+    this.visual = spaceSuit;
+    this.visual.position.copy(this.body.position);
+    this.visual.receiveShadow = true;
+    this.visual.castShadow = true;   
 }
 
 function setupGui()
 {
 	// Definicion de los controles
 	effectController = {
-		color: "rgb(255,0,0)"
+        color: "rgb(255,0,0)",
+        reset: function() {
+            console.log("reset");
+            for (i=0; i<players.length; i++) {
+                players[i].body.position.x = positions[i][0];
+                players[i].body.position.y = positions[i][1];
+                players[i].body.position.z = positions[i][2];
+                players[i].visual.position.copy(players[i].body.position);
+            }
+        }
 	};
 
 	// Creacion interfaz
 	var gui = new dat.GUI();
 
 	// Construccion del menu
-    var h = gui.addFolder("Select Space-Suit Color");
+    var h = gui.addFolder("Controller");
     var sensorColor = h.addColor(effectController, "color").name("Color");
 	sensorColor.onChange(function(color) {
-							spaceSuit.traverse(function(child) {
+                            for (i=0; i<players.length; i++) {
+                                players[i].visual.material.color = new THREE.Color(color);
+                            }
+							/*spaceSuit.traverse(function(child) {
                                 if( child instanceof THREE.Mesh ) child.material.color = new THREE.Color(color);
-							})
-						});    
+							})*/
+                        });
+    h.add(effectController, "reset").name("Reset");
 }
 
 function setCameras(aspectRatio) {
@@ -318,60 +346,20 @@ function updateAspectRatio() {
 }
 
 function keyDown(event) {
-    // Detect x-axis movement
-    if (event.keyCode == 37 || event.keyCode == 65) {
-        upPressed = true;
-    }
-    if (event.keyCode == 39 || event.keyCode == 68) {
-        downPressed = true;
-    }
-    // Detect z-axis movement
-    if (event.keyCode == 38 || event.keyCode == 65) {
-        leftPressed = true;
-    }
-    if (event.keyCode == 40 || event.keyCode == 65) {
-        rightPressed = true;
-    }
     if (event.keyCode == 32) {
         jumpPressed = true;
     }
-
-    if (upPressed ^ downPressed)    {moveY = (upPressed ? 1 : -1);}
-    if (rightPressed ^ leftPressed) {moveX = (rightPressed ? 1 : -1);}
-    if (upPressed && downPressed)   {moveY = 0;}
-    if (rightPressed && leftPressed){moveX = 0;}
 }
 
 function keyUp(event) {
-    // Detect x-axis movement
-    if (event.keyCode == 37 || event.keyCode == 65) {
-        upPressed = false;
-    }
-    if (event.keyCode == 39 || event.keyCode == 68) {
-        downPressed = false;
-    }
-    // Detect z-axis movement
-    if (event.keyCode == 38 || event.keyCode == 65) {
-        leftPressed = false;
-    }
-    if (event.keyCode == 40 || event.keyCode == 65) {
-        rightPressed = false;
-    }
     if (event.keyCode == 32) {
         jumpPressed = false;
     }
-
-    if (!upPressed && !downPressed)         {moveY = 0;} 
-    else if (upPressed && !downPressed)     {moveY = 1;}
-    else                                    {moveY = -1;}
-    if (!rightPressed && !leftPressed)      {moveX = 0;}
-    else if (rightPressed && !leftPressed)  {moveX = 1;}
-    else                                    {moveX = -1;}
 }
 
 function update() {
     var seconds = clock.getDelta();	// tiempo en segundos que ha pasado
-	world.step(seconds);
+    world.step(seconds);
 
     // Frame variation during each frame
     var ahora = Date.now();
@@ -385,56 +373,25 @@ function update() {
     earth.rotation.y = earth_angle;
     earth.rotation.x = AXIAL_TILT;
 
-    // Player rotation
-    //var bodyUp = (moon.body.position-player.body.position).normalize();  // Vec3
-    var bodyUp = new CANNON.Vec3(player.body.position.x, player.body.position.y, player.body.position.z).normalize()
-    var gravityUp = new CANNON.Quaternion();
-    gravityUp.setFromEuler(bodyUp, 'XYZ');
-    //gravityUp.normalize();
-
-    player.body.rotation = gravityUp;    
-    player.visual.rotation.copy(player.body.rotation);
-
     // Player gravitational pull
-    var forceX = player.body.position.x * gravity;
-    var forceY = player.body.position.y * gravity;
-    var forceZ = player.body.position.z * gravity;
-    player.body.applyForce(new CANNON.Vec3(forceX, forceY, forceZ), player.body.position);
+    for (i=0; i<players.length; i++) {
+        var forceX = players[i].body.position.x * gravity;
+        var forceY = players[i].body.position.y * gravity;
+        var forceZ = players[i].body.position.z * gravity;
+        players[i].body.applyForce(new CANNON.Vec3(forceX, forceY, forceZ), players[i].body.position);
 
-    // Player movement
-    if (upPressed || downPressed || leftPressed || rightPressed) {
-        moveDir = new CANNON.Vec3(moveX, 0, moveY).normalize();
-        //var moveDirX = moveDir.x * moveSpeed * 100;
-        //var moveDirZ = moveDir.z * moveSpeed * 100;
-        var moveDirX = moveX * moveSpeed * 5;
-        var moveDirZ = moveY * moveSpeed * 5;
-        player.body.applyLocalImpulse(new CANNON.Vec3(moveDirX, 0, moveDirZ), player.body.position);
-        
-        /*
-        var moveDirX = moveX * moveSpeed * 0.001;
-        var moveDirZ = moveY * moveSpeed * 0.001;
-        console.log(moveDirX, moveDirZ);
-        var newPos = new CANNON.Vec3();
-        player.body.vectorToWorldFrame(new CANNON.Vec3(moveDirX, 0, moveDirZ), newPos);
-        console.log(newPos);
-        player.body.position.x = newPos.x;
-        player.body.position.y = newPos.y;
-        player.body.position.z = newPos.z;
-        */
+        // Player jump    
+        if (jumpPressed) {
+            var r = Math.sqrt(Math.pow(players[i].body.position.x, 2) + Math.pow(players[i].body.position.y, 2) + Math.pow(players[i].body.position.z, 2));
+            if (r < 184) {
+                forceX = forceX * -40;
+                forceY = forceY * -40;
+                forceZ = forceZ * -40;
+                players[i].body.applyForce(new CANNON.Vec3(forceX, forceY, forceZ), players[i].body.position);
+            }         
+        }
+        players[i].visual.position.copy(players[i].body.position);
     }
-    console.log(player.body.position);
-
-    // Player jump    
-    if (jumpPressed) {
-        var r = Math.sqrt(Math.pow(player.body.position.x, 2) + Math.pow(player.body.position.y, 2) + Math.pow(player.body.position.z, 2));
-        if (r < 184) {
-            forceX = forceX * -30;
-            forceY = forceY * -30;
-            forceZ = forceZ * -30;
-            player.body.applyForce(new CANNON.Vec3(forceX, forceY, forceZ), player.body.position);
-        }         
-    }
-    player.visual.position.copy(player.body.position);
     
 	// Control de camra
 	cameraControls.update();
