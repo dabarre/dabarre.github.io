@@ -1,6 +1,6 @@
 ## Gráficos por computador - Proyecto final
 
-Este [proyecto](https://dabarre.github.io/webgl/proyectoGPC.html) trata de simular una perspectiva de la luna, mientras, que a su vez simula su gravedad sobre varias esferas, posicionadas en distintos puntos de la esfera.
+Este [proyecto](https://dabarre.github.io/webgl/proyectoGPC.html) trata de simular una perspectiva de la luna, mientras, que a su vez simula su gravedad sobre varias esferas, posicionadas en distintos puntos de la luna.
 
 `Spacebar` - salto
 
