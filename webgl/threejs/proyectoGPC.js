@@ -10,7 +10,6 @@ var clock
 
 var path = "images/";
 var cameraControls;
-var stats;
 var effectController;
 var dices = [];
 
@@ -36,17 +35,19 @@ var moon_radius = 1737;
 var distance = 384000;
 var spaceSuit;
 
+earth_radius *= scale;
+moon_radius *= scale;
+distance *= scale**2;
+
 var players = [];
-var extra_dist = 10;
+var extra_dist = 20;
 var positions = [[moon_radius+extra_dist, 0, 0], [0, moon_radius+extra_dist, 0], [0, 0, moon_radius+extra_dist],
                 [-moon_radius-extra_dist, 0, 0], [0, -moon_radius-extra_dist, 0], [0, 0, -moon_radius-extra_dist],
                 [moon_radius+extra_dist, moon_radius+extra_dist, 0], [-moon_radius-extra_dist, moon_radius+extra_dist, 0], [moon_radius+extra_dist, -moon_radius-extra_dist, 0], [-moon_radius-extra_dist, -moon_radius-extra_dist, 0], 
                 [moon_radius+extra_dist, 0, moon_radius+extra_dist], [-moon_radius-extra_dist, 0, moon_radius+extra_dist], [moon_radius+extra_dist, 0, -moon_radius-extra_dist], [-moon_radius-extra_dist, 0, -moon_radius-extra_dist], 
                 [0, moon_radius+extra_dist, moon_radius+extra_dist], [0, -moon_radius-extra_dist, moon_radius+extra_dist], [0, moon_radius+extra_dist, -moon_radius-extra_dist], [0, -moon_radius-extra_dist, -moon_radius-extra_dist]];
 
-earth_radius *= scale;
-moon_radius *= scale;
-distance *= scale**2;
+
 
 // Variables gravity sphere
 var gravity = -1.625;
@@ -88,14 +89,6 @@ function init() {
     cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
     cameraControls.target.set(0, 0, 0);
     cameraControls.enableKeys = false;
-
-    // STATS --> stats.update() en update()
-	stats = new Stats();
-	stats.setMode(0);					// Muestra FPS
-	stats.domElement.style.position = 'absolute';		// Abajo izquierda
-	stats.domElement.style.bottom = '100px';
-	stats.domElement.style.left = '0px';
-	document.getElementById('container').appendChild( stats.domElement );
 
     // Event capture
     window.addEventListener('resize', updateAspectRatio);
@@ -384,9 +377,10 @@ function update() {
         if (jumpPressed) {
             var r = Math.sqrt(Math.pow(players[i].body.position.x, 2) + Math.pow(players[i].body.position.y, 2) + Math.pow(players[i].body.position.z, 2));
             if (r < 184) {
-                forceX = forceX * -40;
-                forceY = forceY * -40;
-                forceZ = forceZ * -40;
+                forceScalar = -60;
+                forceX = forceX * forceScalar;
+                forceY = forceY * forceScalar;
+                forceZ = forceZ * forceScalar;
                 players[i].body.applyForce(new CANNON.Vec3(forceX, forceY, forceZ), players[i].body.position);
             }         
         }
@@ -395,8 +389,6 @@ function update() {
     
 	// Control de camra
 	cameraControls.update();
-	// Actualiza los FPS
-	stats.update();
 }
 
 function render() {
