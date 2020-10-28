@@ -199,9 +199,9 @@ function setCameras(aspectRatio) {
 
     // Give planes to the orthogonal camera: left, right, top, bottom, origin
     if (aspectRatio > 1) {
-        var orthoCamera = new THREE.OrthographicCamera(l*aspectRatio, r*aspectRatio, t, b, -20, 800);
+        var orthoCamera = new THREE.OrthographicCamera(l, -l, -l, l, -20, 800);
     } else {
-        var orthoCamera = new THREE.OrthographicCamera(l, r, t*aspectRatio, b*aspectRatio, -20, 800);
+        var orthoCamera = new THREE.OrthographicCamera(l, -l, -l, l, -20, 800);
     }
     planta = orthoCamera.clone()
     planta.position.set(0, 300, 0);
@@ -229,6 +229,19 @@ function updateAspectRatio() {
     
     // Perspective camera
     camera.aspect = aspectRatio;
+
+    if (aspectRatio < 1) {
+        planta.left = -100;
+        planta.right = 100;
+        planta.top = 100;
+        planta.bottom = -100;
+    } else {
+        planta.left = -100;
+        planta.right = 100;
+        planta.top = 100;
+        planta.bottom = -100;
+    }
+    planta.updateProjectionMatrix()
     camera.updateProjectionMatrix();
 }
 
