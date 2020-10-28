@@ -1,5 +1,11 @@
-## Uso y alcance de este proyecto
-**Este proyecto tiene fines exclusivamente docentes**   
-El proyecto incluye material extraído del proyecto público [Three.js](http://threjs.org) *r96*, bibliotecas de utilidad del texto *"WebGL Programming Guide" de  Kouichi Matsuda y Rodger Lea* y código propio de *<rvivo@upv.es>*.  
+## Gráficos por computador - Proyecto final
 
-Para más información sobre su uso y alcance consultar la [wiki](https://github.com/RobVivo/RobVivo.github.io/wiki/INSTRUCCIONES-B%C3%81SICAS)
+Este [proyecto](https://dabarre.github.io/webgl/proyectoGPC.html) trata de simular una perspectiva de la luna, mientras, que a su vez simula su gravedad sobre varias esferas, posicionadas en distintos puntos de la esfera.
+
+`Spacebar` - salto
+
+`Mouse` - control de la cámara
+
+`Controls_select_color` - cambiar de color todas las esferas.
+
+`Controls_reset` - mover todas las esferas a su posición inicial.
